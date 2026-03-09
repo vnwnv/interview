@@ -1,0 +1,16 @@
+# Pod Cleaner Dependencies
+
+# Kubernetes Python client
+kubernetes==35.0.0
+
+# Scheduler for periodic tasks
+APScheduler==3.11.2
+
+# HTTP requests for ntfy notifications
+requests==2.32.5
+
+# Lightweight web framework for health endpoints
+Flask==3.1.2
+
+# Production WSGI server
+waitress==3.0.2

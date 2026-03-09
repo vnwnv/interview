@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+htmlcov/
+.coverage
+.git/
+.gitignore
+.dockerignore
+.venv/
+venv/
+tests/
+*.md
+requirements-dev.txt
+.vscode/

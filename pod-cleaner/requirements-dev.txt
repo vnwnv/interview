@@ -1,0 +1,14 @@
+# Development dependencies
+
+-r requirements.txt
+
+# Testing
+pytest==9.0.2
+pytest-cov==7.0.0
+
+# Linting and formatting
+ruff==0.15.0
+mypy==1.19.1
+
+# Type stubs
+types-requests==2.32.4.20260107

@@ -1,0 +1,106 @@
+# Pod Cleaner Deployment
+# Runs the pod cleaner service with health checks and resource limits
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pod-cleaner
+  namespace: pod-cleaner
+  labels:
+    app: pod-cleaner
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pod-cleaner
+  template:
+    metadata:
+      labels:
+        app: pod-cleaner
+    spec:
+      serviceAccountName: pod-cleaner
+      
+      # Security context
+      securityContext:
+        runAsNonRoot: true
+      
+      imagePullSecrets:
+        - name: <secret-name>
+      containers:
+        - name: pod-cleaner
+          image: <registry>/pod-cleaner:latest
+          imagePullPolicy: Always
+          
+          # Container security
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          
+          # Environment variables
+          env:
+            - name: CLEANUP_INTERVAL_MINUTES
+              value: "10"
+            - name: MAX_WORKERS
+              value: "10"
+            - name: HEALTH_PORT
+              value: "8080"
+            - name: LOG_LEVEL
+              value: "DEBUG"
+            # Uncomment and configure for ntfy notifications
+            # - name: NTFY_URL
+            #   value: "http://ntfy.example.com/pod-cleaner"
+            # - name: NTFY_TOKEN
+            #   valueFrom:
+            #     secretKeyRef:
+            #       name: pod-cleaner-secrets
+            #       key: ntfy-token
+          
+          # Health probes
+          ports:
+            - name: health
+              containerPort: 8080
+              protocol: TCP
+          
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: health
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+          
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: health
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          
+          # Resource limits
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+      
+      # Graceful termination
+      terminationGracePeriodSeconds: 30
+
+---
+# Optional: Secret for ntfy authentication
+# apiVersion: v1
+# kind: Secret
+# metadata:
+#   name: pod-cleaner-secrets
+#   namespace: pod-cleaner
+# type: Opaque
+# stringData:
+#   ntfy-token: "your-ntfy-token-here"
